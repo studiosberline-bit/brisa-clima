@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Brisa | Consulta del clima</title>
+  <meta name="description"
+    content="Brisa: consulta el clima actual y el pronóstico de los próximos días en cualquier ciudad del mundo.">
+
+  <!-- Tipografías: Fraunces (títulos) e Inter (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- Iconos (se reutilizan con <use>) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-pin" viewBox="0 0 24 24">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </symbol>
+    <symbol id="i-droplet" viewBox="0 0 24 24">
+      <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+    </symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24">
+      <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
+      <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
+      <path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
+    </symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24">
+      <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+    </symbol>
+    <symbol id="i-cloud-sun" viewBox="0 0 24 24">
+      <path d="M12 2v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="M20 12h2" />
+      <path d="m19.07 4.93-1.41 1.41" />
+      <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+      <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </symbol>
+    <symbol id="i-cloud-snow" viewBox="0 0 24 24">
+      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+      <path d="M8 15h.01" />
+      <path d="M8 19h.01" />
+      <path d="M12 17h.01" />
+      <path d="M12 21h.01" />
+      <path d="M16 15h.01" />
+      <path d="M16 19h.01" />
+    </symbol>
+    <symbol id="i-cloud-rain" viewBox="0 0 24 24">
+      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+      <path d="M16 14v6" />
+      <path d="M8 14v6" />
+      <path d="M12 16v6" />
+    </symbol>
+    <symbol id="i-cloud-drizzle" viewBox="0 0 24 24">
+      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+      <path d="M8 19v1" />
+      <path d="M8 14v1" />
+      <path d="M16 19v1" />
+      <path d="M16 14v1" />
+      <path d="M12 21v1" />
+      <path d="M12 16v1" />
+    </symbol>
+    <symbol id="i-cloud-fog" viewBox="0 0 24 24">
+      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+      <path d="M16 17H7" />
+      <path d="M17 21H9" />
+    </symbol>
+    <symbol id="i-cloud-lightning" viewBox="0 0 24 24">
+      <path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973" />
+      <path d="m13 12-3 5h4l-3 5" />
+    </symbol>
+    <symbol id="i-sunrise" viewBox="0 0 24 24">
+      <path d="M12 2v8" />
+      <path d="m4.93 10.93 1.41 1.41" />
+      <path d="M2 18h2" />
+      <path d="M20 18h2" />
+      <path d="m19.07 10.93-1.41 1.41" />
+      <path d="M22 22H2" />
+      <path d="m8 6 4-4 4 4" />
+      <path d="M16 18a4 4 0 0 0-8 0" />
+    </symbol>
+    <symbol id="i-sunset" viewBox="0 0 24 24">
+      <path d="M12 10V2" />
+      <path d="m4.93 10.93 1.41 1.41" />
+      <path d="M2 18h2" />
+      <path d="M20 18h2" />
+      <path d="m19.07 10.93-1.41 1.41" />
+      <path d="M22 22H2" />
+      <path d="m16 6-4 4-4-4" />
+      <path d="M16 18a4 4 0 0 0-8 0" />
+    </symbol>
+  </svg>
+
+  <!-- Círculos decorativos del fondo -->
+  <div class="fondo" aria-hidden="true"><span class="circulo verde"></span><span class="circulo arena"></span></div>
+
+  <header class="cabecera caja">
+    <a class="logo" href="./" aria-label="Brisa, inicio">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 20 8.5 10" />
+        <path d="M11 20 13.5 4" />
+        <path d="M17 20 18 9" />
+      </svg>
+      Brisa
+    </a>
+    <p class="lema">Tu pronóstico, sin ruido.</p>
+  </header>
+
+  <main>
+    <!-- INICIO -->
+    <section class="hero caja">
+      <div class="hero-texto">
+        <p class="etiqueta">Clima en tiempo real</p>
+        <h1>¿Qué tiempo hace <em>ahí fuera?</em></h1>
+        <p class="bajada">Consulta las condiciones actuales y planifica los próximos días en cualquier lugar del mundo.
+        </p>
+
+        <form class="buscador" id="buscador" role="search" novalidate>
+          <svg class="ico" aria-hidden="true">
+            <use href="#i-search" />
+          </svg>
+          <label class="solo-lectores" for="ciudad">Ciudad</label>
+          <input id="ciudad" type="search" placeholder="Busca una ciudad..." autocomplete="off" enterkeyhint="search">
+          <button type="submit" id="buscar" disabled>Buscar</button>
+        </form>
+        <p class="aviso" id="aviso" role="status" aria-live="polite"></p>
+
+        <div class="sugerencias">
+          <span>Prueba con</span>
+          <button type="button" data-ciudad="Barcelona">Barcelona</button>
+          <button type="button" data-ciudad="Buenos Aires">Buenos Aires</button>
+          <button type="button" data-ciudad="Tokio">Tokio</button>
+        </div>
+      </div>
+
+      <!-- Tarjeta del clima actual (se llena con main.js) -->
+      <article class="clima" id="clima" aria-live="polite">
+        <span class="aro" aria-hidden="true"></span>
+        <div class="clima-cab">
+          <div>
+            <p class="lugar"><svg class="ico" aria-hidden="true">
+                <use href="#i-pin" />
+              </svg><span id="region">Comunidad de Madrid</span></p>
+            <h2 class="ciudad" id="nombre">Madrid</h2>
+            <p class="pais" id="pais">España</p>
+          </div>
+          <span class="ahora"><i></i>Ahora</span>
+        </div>
+
+        <div class="temp-fila">
+          <svg class="ico icono-grande" id="icono" aria-hidden="true">
+            <use href="#i-cloud" />
+          </svg>
+          <p class="grados"><span id="temp">--</span><sup aria-hidden="true"></sup><span class="solo-lectores">
+              grados</span></p>
+          <div class="estado">
+            <strong id="estado">Cargando…</strong>
+            <span id="sensacion">&nbsp;</span>
+          </div>
+        </div>
+
+        <dl class="datos">
+          <div><svg class="ico" aria-hidden="true">
+              <use href="#i-droplet" />
+            </svg>
+            <div>
+              <dt>Humedad</dt>
+              <dd id="humedad">--</dd>
+            </div>
+          </div>
+          <div><svg class="ico" aria-hidden="true">
+              <use href="#i-wind" />
+            </svg>
+            <div>
+              <dt>Viento</dt>
+              <dd id="viento">--</dd>
+            </div>
+          </div>
+          <div><svg class="ico" aria-hidden="true">
+              <use href="#i-cloud-rain" />
+            </svg>
+            <div>
+              <dt>Precipitación</dt>
+              <dd id="lluvia">--</dd>
+            </div>
+          </div>
+        </dl>
+
+        <div class="sol">
+          <p><svg class="ico" aria-hidden="true">
+              <use href="#i-sunrise" />
+            </svg>Amanecer <b id="amanecer">--:--</b></p>
+          <p><svg class="ico" aria-hidden="true">
+              <use href="#i-sunset" />
+            </svg>Atardecer <b id="atardecer">--:--</b></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- PRÓXIMOS DÍAS -->
+    <section class="proximos caja">
+      <div class="proximos-cab">
+        <div>
+          <p class="etiqueta">Próximos días</p>
+          <h2>El tiempo de un vistazo</h2>
+        </div>
+        <p class="nota">Pronóstico local actualizado</p>
+      </div>
+      <div class="dias" id="dias" role="list"></div>
+    </section>
+  </main>
+
+  <footer class="pie caja">
+    <p>Datos meteorológicos de Open-Meteo</p>
+    <p>Actualización en tiempo real</p>
+    <p>Hecho por Fernanda Moreno</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>

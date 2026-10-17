@@ -1,0 +1,995 @@
+/* =====================================================================
+   BRISA · Consulta del clima
+   Hoja de estilos principal
+   Autora: Fernanda Moreno
+
+   Qué es:
+   Esta hoja de estilos le da forma a Brisa, un sitio para consultar el
+   clima de cualquier ciudad. Primero diseñé el sitio en Figma y después la
+   pasé a código, intentando que quedara igual al diseño.
+
+   Cómo la organicé:
+     1. Variables (colores y tipografías)
+     2. Base: reinicio, contenedor y utilidades
+     3. Fondo decorativo
+     4. Cabecera
+     5. Etiquetas
+     6. Inicio: título, buscador y sugerencias
+     7. Tarjeta del clima actual
+     8. Próximos días
+     9. Pie de página
+    10. Responsive: tablet, celular, pantallas muy pequeñas y grandes
+    11. Accesibilidad y detalles táctiles
+
+   Cosas que tuve en cuenta:
+   - Casi todas las medidas están en rem (1rem = 16px normalmente), para
+     que el diseño escale si el usuario cambia el tamaño de su letra.
+   - Empecé por la versión de computador y la adapté con media queries
+     de tipo max-width (de pantalla grande a pequeña).
+   - Los colores y las fuentes viven en variables, así los cambio en un
+     solo lugar.
+   ===================================================================== */
+
+
+/* =====================================================================
+   1. VARIABLES: colores y tipografías
+   ===================================================================== */
+:root {
+  --fondo: #F4F1EA;        /* beige claro del fondo de la página */
+  --tinta: #1C2B24;        /* casi negro con tono verde, para los textos */
+  --suave: #66706A;        /* gris verdoso para textos secundarios */
+  --tenue: #9AA29C;        /* gris claro para etiquetas y datos pequeños */
+  --verde: #243A2F;        /* verde oscuro de la tarjeta del clima */
+  --verde-claro: #5B7A62;  /* verde de "ahí fuera?" en el título */
+  --terracota: #D4572B;    /* color de acento: etiquetas, botón y detalles */
+  --salmon: #E9B7A5;       /* botón "Buscar" cuando está desactivado */
+  --oro: #E4B04A;          /* dorado de los íconos del clima */
+  --linea: #DED8CB;        /* color de las líneas divisorias */
+  --papel: #FFFEFB;        /* blanco cálido de las tarjetas de los días */
+
+  /* Si Fraunces o Inter no cargan, el navegador usa las siguientes opciones */
+  --titulos: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --texto: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+
+/* =====================================================================
+   2. BASE: reinicio, contenedor y utilidades
+   ===================================================================== */
+
+/* Reinicio: con border-box, el padding y el borde cuentan dentro del
+   ancho de cada elemento (así los cálculos son más fáciles), y margin: 0
+   quita los márgenes que el navegador pone por defecto. */
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Evita que el iPhone agrande el texto por su cuenta al girar la pantalla */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 400 0.9rem / 1.7 var(--texto);  /* peso, tamaño / interlineado, fuente */
+  overflow-x: hidden;   /* evita que la página se mueva de lado por los círculos del fondo */
+  position: relative;   /* es la referencia para ubicar el fondo decorativo (.fondo) */
+  min-height: 100vh;    /* el fondo siempre cubre la pantalla completa */
+}
+
+/* Los enlaces heredan el color del texto, para que no salgan en azul */
+a {
+  color: inherit;
+}
+
+/* Botones y campos de texto heredan la fuente y el color de la página
+   (por defecto el navegador les pone los suyos) */
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* Contorno que ve quien navega con el teclado (tecla Tab).
+   Uso la terracota para que combine con el diseño. */
+:focus-visible {
+  outline: 2px solid var(--terracota);
+  outline-offset: 3px;
+}
+
+/* Contenedor central: mide como máximo 75rem (1200px) y deja 1.5rem de
+   aire a cada lado. min() elige el valor más pequeño de los dos, así
+   nunca se sale de la pantalla. */
+.caja {
+  width: min(100% - 3rem, 75rem);
+  margin-inline: auto;
+}
+
+/* Texto que solo leen los lectores de pantalla (se oculta a la vista,
+   pero sigue existiendo para quien lo necesita). Lo uso en la etiqueta
+   del buscador. */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Estilo base de todos los íconos SVG: solo línea, sin relleno.
+   stroke: currentColor hace que tomen el color del texto donde estén. */
+.ico {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;           /* que no se encoja dentro de un contenedor flex */
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* =====================================================================
+   3. FONDO DECORATIVO: los dos círculos de colores
+   ===================================================================== */
+
+/* Capa que cubre toda la página y recorta lo que se sale de ella.
+   pointer-events: none hace que no estorbe al hacer clic. */
+.fondo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.circulo {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* Círculo verde pálido de arriba a la derecha (solo se ve una parte) */
+.circulo.verde {
+  width: 30rem;
+  aspect-ratio: 1;   /* alto = ancho, así es un círculo perfecto */
+  right: -15rem;
+  top: -15rem;
+  background: #E2E7D8;
+}
+
+/* Círculo arena del lado izquierdo (también se asoma solo un poco) */
+.circulo.arena {
+  width: 23rem;
+  aspect-ratio: 1;
+  left: -14.8rem;
+  top: 28rem;
+  background: #EBE3D0;
+}
+
+/* Cabecera, contenido principal y pie van por encima del fondo */
+.cabecera,
+main,
+.pie {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* =====================================================================
+   4. CABECERA: logo y lema
+   ===================================================================== */
+.cabecera {
+  display: flex;
+  justify-content: space-between;   /* logo a la izquierda, lema a la derecha */
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 700 1.15rem var(--texto);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+/* El logo son tres rayitas inclinadas dibujadas con trazos SVG */
+.logo svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--terracota);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+/* "Tu pronóstico, sin ruido." (se oculta en celulares para ahorrar espacio) */
+.lema {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+
+
+/* =====================================================================
+   5. ETIQUETAS: "Clima en tiempo real", "Próximos días"
+   ===================================================================== */
+.etiqueta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font: 700 0.6rem var(--texto);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--terracota);
+}
+
+/* La rayita de la izquierda la dibujo con ::before, sin necesitar HTML extra */
+.etiqueta::before {
+  content: "";
+  width: 1.5rem;
+  height: 1px;
+  background: var(--terracota);
+}
+
+
+/* =====================================================================
+   6. INICIO: título, buscador y sugerencias
+   ===================================================================== */
+
+/* Dos columnas: texto a la izquierda (0.78) y tarjeta del clima a la
+   derecha (1). Uso minmax(0, ...) para que las columnas puedan encogerse
+   y nada se salga de la pantalla. El espacio entre columnas (gap) crece
+   con el ancho de la pantalla gracias a clamp(mínimo, ideal, máximo). */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
+  gap: clamp(2rem, 6vw, 7rem);
+  align-items: center;
+  padding: 4rem 0 4.5rem;
+  border-bottom: 1px solid var(--linea);
+}
+
+/* El tamaño del título se ajusta solo: nunca baja de 3rem ni pasa de 5rem,
+   y entre medias vale el 6.4% del ancho de la pantalla (6.4vw). */
+h1 {
+  font: 700 clamp(3rem, 6.4vw, 5rem) / 0.92 var(--titulos);
+  letter-spacing: -0.035em;
+  margin-top: 1.2rem;
+}
+
+/* "ahí fuera?" va en cursiva y verde. display: block lo manda a otra línea. */
+h1 em {
+  display: block;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--verde-claro);
+  letter-spacing: -0.03em;
+}
+
+.bajada {
+  margin-top: 1.75rem;
+  max-width: 27rem;   /* limita el ancho para que la lectura sea cómoda */
+  color: var(--suave);
+  font-size: 0.85rem;
+  line-height: 1.9;
+}
+
+/* ---- Buscador ---- */
+
+/* La caja blanca del buscador: ícono + campo + botón en una fila */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 2.2rem;
+  padding: 0.55rem 0.55rem 0.55rem 1.1rem;
+  background: #fff;
+  border: 1px solid #E6E1D5;
+  border-radius: 0.4rem;
+  box-shadow: 0 4px 14px rgba(36, 58, 47, 0.06);
+}
+
+.buscador .ico {
+  color: var(--tenue);
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* El campo de texto no tiene borde propio: el borde es el de .buscador.
+   min-width: 0 permite que se encoja en pantallas pequeñas. */
+.buscador input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font-size: 0.9rem;
+  padding: 0.55rem 0;
+}
+
+.buscador input::placeholder {
+  color: var(--tenue);
+}
+
+/* Quito el contorno del campo porque, en su lugar, resalto todo el
+   buscador con el borde terracota (ver la regla de :focus-within) */
+.buscador input:focus-visible {
+  outline: none;
+}
+
+/* Cuando escribo dentro del buscador, su borde se pone terracota */
+.buscador:focus-within {
+  border-color: var(--terracota);
+}
+
+.buscador button {
+  border: 0;
+  border-radius: 0.3rem;
+  background: var(--terracota);
+  color: #fff;
+  font: 700 0.72rem var(--texto);
+  padding: 0.8rem 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+/* Al pasar el mouse se oscurece, pero solo si el botón está activo */
+.buscador button:hover:not(:disabled) {
+  background: #B84720;
+}
+
+/* Sin texto escrito, el botón se ve salmón y no se puede presionar */
+.buscador button:disabled {
+  background: var(--salmon);
+  cursor: not-allowed;
+}
+
+/* Mensaje de error ("No encontramos esa ciudad"). Reservo su altura con
+   min-height para que la página no salte cuando aparece el mensaje. */
+.aviso {
+  min-height: 1.4rem;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--terracota);
+}
+
+/* ---- Sugerencias: "Prueba con Barcelona, Buenos Aires, Tokio" ---- */
+.sugerencias {
+  display: flex;
+  flex-wrap: wrap;   /* si no caben en una línea, bajan a la siguiente */
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.sugerencias span {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  margin-right: 0.2rem;
+}
+
+.sugerencias button {
+  background: transparent;
+  border: 1px solid var(--linea);
+  border-radius: 999px;   /* un radio enorme da la forma de píldora */
+  padding: 0.2rem 0.8rem;
+  font-size: 0.68rem;
+  color: var(--suave);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.sugerencias button:hover {
+  border-color: var(--terracota);
+  color: var(--terracota);
+}
+
+
+/* =====================================================================
+   7. TARJETA DEL CLIMA ACTUAL (la tarjeta verde oscura)
+   ===================================================================== */
+
+/* Columna vertical: space-between reparte los bloques (encabezado,
+   temperatura, datos, sol) a lo alto de la tarjeta. min-height le da la
+   altura que tiene en mi diseño de Figma. overflow: hidden recorta el
+   aro decorativo que se sale por la esquina. */
+.clima {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.6rem;
+  min-height: 29.9rem;
+  padding: 2.8rem 2.9rem 2.6rem;
+  background: var(--verde);
+  color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 30px 60px rgba(36, 58, 47, 0.28);
+  transition: opacity 0.3s;
+}
+
+/* JavaScript le pone esta clase mientras espera la respuesta de la API,
+   y la tarjeta se ve un poco opaca para indicar que está cargando */
+.clima.cargando {
+  opacity: 0.65;
+}
+
+/* Aro delgado decorativo de la esquina superior derecha */
+.aro {
+  position: absolute;
+  top: -9.7rem;
+  right: -9.7rem;
+  width: 19.4rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Todo el contenido de la tarjeta (menos el aro) queda por encima de él */
+.clima> :not(.aro) {
+  position: relative;
+}
+
+/* ---- Encabezado: lugar, ciudad, país y la píldora "Ahora" ---- */
+.clima-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.lugar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #A9BBAF;
+}
+
+.lugar .ico {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* overflow-wrap: anywhere parte nombres de ciudad muy largos para que
+   no rompan el diseño */
+.ciudad {
+  font: 700 clamp(2.1rem, 5vw, 2.7rem) / 1.1 var(--titulos);
+  letter-spacing: -0.02em;
+  margin-top: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.pais {
+  font-size: 0.62rem;
+  color: #8FA396;
+  margin-top: 0.35rem;
+}
+
+/* Píldora "Ahora" con un puntito terracota */
+.ahora {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);   /* blanco casi transparente */
+  border-radius: 999px;
+  font: 700 0.55rem var(--texto);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ahora i {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: var(--terracota);
+}
+
+/* ---- Temperatura: ícono, número grande y descripción ---- */
+
+/* flex-wrap deja que el texto baje de línea si no cabe (en celulares) */
+.temp-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2.2rem;   /* primero el espacio vertical, luego el horizontal */
+}
+
+.icono-grande {
+  width: 3.6rem;
+  height: 3.6rem;
+  stroke: var(--oro);
+  stroke-width: 1.4;
+}
+
+/* El número grande. El borde derecho es la rayita vertical que lo separa
+   de la descripción ("Nieve", "Sensación de..."). */
+.grados {
+  display: flex;
+  align-items: center;
+  font: 600 clamp(4rem, 9vw, 5.6rem) / 0.9 var(--titulos);
+  letter-spacing: -0.04em;
+  padding: 0.4rem 2.2rem 0.4rem 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* El símbolo de grado (°) lo dibujo como un anillito con borde, y lo
+   subo a la esquina superior del número con align-self */
+.grados sup {
+  display: block;
+  align-self: flex-start;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  margin: 0.15rem 0 0 0.2rem;
+}
+
+.estado {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.estado strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.estado span {
+  font-size: 0.62rem;
+  color: #8FA396;
+}
+
+/* ---- Datos: humedad, viento y precipitación ---- */
+
+/* Tres columnas iguales (repeat(3, 1fr)) con una línea encima */
+.datos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-top: 1.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.datos>div {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+/* Del segundo dato en adelante pongo una rayita vertical a la izquierda.
+   El selector "div + div" significa: un div que va justo después de otro. */
+.datos>div+div {
+  padding-left: 1.5rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.datos .ico {
+  color: var(--oro);
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.datos dt {
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8FA396;
+  line-height: 1.4;
+}
+
+.datos dd {
+  margin: 0;   /* el navegador le pone un margen por defecto que no quiero */
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* ---- Amanecer y atardecer ---- */
+.sol {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.sol p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  color: #A9BBAF;
+}
+
+.sol b {
+  color: #fff;
+  font-size: 0.66rem;
+}
+
+.sol .ico {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--oro);
+}
+
+
+/* =====================================================================
+   8. PRÓXIMOS DÍAS
+   ===================================================================== */
+.proximos {
+  padding: 3.75rem 0 0;
+}
+
+/* Título a la izquierda y nota a la derecha, alineados por abajo.
+   Si no caben juntos, la nota baja (flex-wrap). */
+.proximos-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.3rem;
+}
+
+h2 {
+  font: 700 clamp(1.9rem, 4.2vw, 2.45rem) / 1.1 var(--titulos);
+  letter-spacing: -0.03em;
+  margin-top: 1rem;
+}
+
+.nota {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  padding-bottom: 0.3rem;
+}
+
+/* Cinco tarjetas del mismo ancho, una por día */
+.dias {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+/* Cada tarjeta es una columna: arriba el día, en medio el ícono y el
+   estado, y abajo las temperaturas (se empujan abajo con margin-top: auto) */
+.dia {
+  display: flex;
+  flex-direction: column;
+  min-height: 13rem;
+  padding: 1.1rem 1.15rem 1rem;
+  background: var(--papel);
+  border: 1px solid #E6E1D5;
+  border-radius: 0.25rem;
+}
+
+/* La tarjeta de "Hoy" tiene una línea terracota arriba para destacarla */
+.dia.hoy {
+  border-top: 2px solid var(--terracota);
+}
+
+.dia-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.dia-cab b {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dia-cab span {
+  font-size: 0.55rem;
+  color: var(--tenue);
+  white-space: nowrap;   /* que "17 oct" no se parta en dos líneas */
+}
+
+.dia .ico {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--oro);
+  stroke-width: 1.4;
+  margin-top: 1.1rem;
+}
+
+.dia .cond {
+  font-size: 0.58rem;
+  line-height: 1.4;
+  color: var(--tenue);
+  margin-top: 0.7rem;
+}
+
+/* Parte de abajo: temperatura máxima y mínima a la izquierda, y la
+   probabilidad de lluvia a la derecha */
+.dia-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: auto;   /* empuja este bloque al fondo de la tarjeta */
+  padding-top: 1rem;
+}
+
+.dia-pie .max {
+  font: 700 1.7rem / 1 var(--titulos);
+  letter-spacing: -0.03em;
+}
+
+.dia-pie .min {
+  font-size: 0.65rem;
+  color: var(--tenue);
+  margin-left: 0.3rem;
+}
+
+.dia-pie .lluvia {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.55rem;
+  color: var(--tenue);
+}
+
+.dia-pie .lluvia .ico {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin: 0;   /* anula el margen superior que tienen los demás íconos del día */
+  color: var(--tenue);
+  stroke-width: 1.8;
+}
+
+
+/* =====================================================================
+   9. PIE DE PÁGINA
+   ===================================================================== */
+.pie {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  flex-wrap: wrap;
+  margin-top: 3.5rem;
+  padding: 1.3rem 0 2.2rem;
+  border-top: 1px solid var(--linea);
+}
+
+.pie p {
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+
+
+/* =====================================================================
+   10. RESPONSIVE: cómo se adapta a cada tamaño de pantalla
+   Uso max-width: el bloque se aplica cuando la pantalla mide ESE ANCHO O
+   MENOS. Van de mayor a menor, y cada uno corrige al anterior.
+   ===================================================================== */
+
+/* ---- TABLET (hasta 56rem, unos 896px) ----
+   El inicio pasa a una sola columna (el texto arriba y la tarjeta del
+   clima abajo) y los cinco días se deslizan de lado. */
+@media (max-width: 56rem) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+    padding: 3rem 0 3.5rem;
+  }
+
+  .clima {
+    min-height: 0;   /* la tarjeta ya no necesita una altura mínima */
+  }
+
+  /* Hago más pequeños los círculos del fondo para que no tapen el contenido */
+  .circulo.verde {
+    width: 18rem;
+    right: -9rem;
+    top: -9rem;
+  }
+
+  .circulo.arena {
+    width: 14rem;
+    left: -9.5rem;
+    top: 24rem;
+  }
+
+  /* Los 5 días se deslizan de lado. scroll-snap hace que cada tarjeta
+     "encaje" al soltar el dedo. El margen negativo con padding hace que
+     la fila llegue hasta los bordes de la pantalla. */
+  .dias {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;   /* oculta la barra de desplazamiento en Firefox */
+    margin-inline: -1.5rem;
+    padding: 0 1.5rem 0.4rem;
+    scroll-padding-inline: 1.5rem;
+    -webkit-overflow-scrolling: touch;   /* deslizado suave en iPhone antiguos */
+  }
+
+  /* Lo mismo, pero para Chrome y Safari */
+  .dias::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dia {
+    flex: 0 0 11.5rem;   /* no crece, no se encoge, mide 11.5rem */
+    scroll-snap-align: start;
+  }
+}
+
+/* ---- CELULAR (hasta 36rem, unos 576px) ----
+   Reduzco espacios y tamaños para que todo quepa cómodo. */
+@media (max-width: 36rem) {
+  .caja {
+    width: min(100% - 2.4rem, 75rem);   /* márgenes laterales más pequeños */
+  }
+
+  .dias {
+    margin-inline: -1.2rem;
+    padding-inline: 1.2rem;
+    scroll-padding-inline: 1.2rem;
+  }
+
+  .lema {
+    display: none;   /* el lema desaparece para dejar espacio al logo */
+  }
+
+  .hero {
+    padding: 2.2rem 0 2.8rem;
+    gap: 2.4rem;
+  }
+
+  .bajada {
+    font-size: 0.88rem;
+  }
+
+  .buscador {
+    padding-left: 0.9rem;
+  }
+
+  .buscador button {
+    padding-inline: 1.1rem;
+  }
+
+  .clima {
+    padding: 1.7rem 1.4rem 1.6rem;
+    gap: 1.4rem;
+  }
+
+  .temp-fila {
+    gap: 0.9rem 1.4rem;
+  }
+
+  .icono-grande {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .grados {
+    padding-right: 1.4rem;
+  }
+
+  .datos {
+    padding-top: 1.3rem;
+  }
+
+  /* Humedad, viento y precipitación: el ícono pasa ARRIBA del texto
+     (en columna) para que los tres datos quepan en una fila angosta */
+  .datos>div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .datos>div+div {
+    padding-left: 0.9rem;
+  }
+
+  .sol {
+    padding-top: 1.2rem;
+  }
+
+  .proximos {
+    padding-top: 3rem;
+  }
+
+  .proximos-cab {
+    margin-bottom: 1.6rem;
+  }
+
+  .dia {
+    flex-basis: 10.5rem;
+  }
+}
+
+/* ---- PANTALLAS MUY PEQUEÑAS (hasta 22rem, unos 352px) ----
+   Pensado para celulares muy angostos, como 320px de ancho. */
+@media (max-width: 22rem) {
+  .clima-cab {
+    flex-wrap: wrap;   /* la píldora "Ahora" puede bajar de línea */
+  }
+
+  .datos dt {
+    font-size: 0.46rem;
+    letter-spacing: 0.06em;
+  }
+
+  .sol {
+    flex-direction: column;   /* amanecer y atardecer, uno debajo del otro */
+    gap: 0.6rem;
+  }
+}
+
+/* ---- PANTALLAS GRANDES (desde 100rem, unos 1600px) ----
+   Subo el tamaño de la letra base a 112.5% (18px en vez de 16px). Como
+   todo está en rem, TODO el diseño crece proporcionalmente y no se ve
+   pequeño en monitores grandes. */
+@media (min-width: 100rem) {
+  html {
+    font-size: 112.5%;
+  }
+}
+
+
+/* =====================================================================
+   11. ACCESIBILIDAD Y DETALLES TÁCTILES
+   ===================================================================== */
+
+/* Si la persona tiene activada la opción "reducir movimiento" en su
+   dispositivo, quito las transiciones de la tarjeta y del botón */
+@media (prefers-reduced-motion: reduce) {
+
+  .clima,
+  .buscador button {
+    transition: none;
+  }
+}
+
+/* ---- Sin azul al tocar o seleccionar ---- */
+
+/* 1) Quita el destello azul que aparece al tocar en celular y tablet */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 2) El texto seleccionado usa mis colores (salmón y tinta) en lugar del
+   azul del navegador. Uso --salmon porque --rosa no existe en este
+   proyecto: si usara una variable que no existe, la selección volvería
+   a salir azul. */
+::selection {
+  background: var(--salmon);
+  color: var(--tinta);
+}
+
+/* 3) Quita el contorno azul que aparece al hacer clic con el mouse, pero
+   conserva mi contorno terracota cuando se navega con el teclado */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 4) Los botones no se seleccionan al tocarlos varias veces seguidas */
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
